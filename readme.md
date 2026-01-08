@@ -3,5 +3,5 @@ Rotation project summary:
  post-mortem brain tissue samples between schizophrenia (SCZ)
  and nonpsychiatric control patients
 
-Lieber Habenula project repository:
-https://github.com/LieberInstitute/Habenula_Pilot.git
+- Lieber Habenula project repository:
+  https://github.com/LieberInstitute/Habenula_Pilot.git
