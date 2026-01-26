@@ -1,2 +1,1 @@
-/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/R18346_HVYTYBBXX_S24_L003_R1_001.fastq.gz	0	/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/R18346_HVYTYBBXX_S24_L003_R2_001.fastq.gz	0	R18346
-/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/R18346_HVYTYBBXX_S24_L004_R1_001.fastq.gz	0	/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/R18346_HVYTYBBXX_S24_L004_R2_001.fastq.gz	0	R18346
+/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test//R18346.fastq.gz	0	/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test//R18346_read2.fastq.gz	0	R18346
