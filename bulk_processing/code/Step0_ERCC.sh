@@ -1,16 +1,19 @@
 #!/bin/bash
+#Prevent silent errors
 set -euo pipefail
 
-## Define variables 
+#Define variables 
 TEMP=$(getopt -o x:p:c:l:s:h \
   --long experiment:,prefix:,cores:,large:,stranded:,help \
   -n 'step0-ercc' -- "$@")
 eval set -- "$TEMP"
 
+#Default parameters
 LARGE="FALSE"
 CORES=8
 STRANDED="FALSE"
 
+#Assign command line arguments to variables
 while true; do
     case "$1" in
         -x|--experiment) EXPERIMENT=$2; shift 2 ;;
@@ -26,7 +29,7 @@ while true; do
     esac
 done
 
-## Setup 
+#Defining more variables
 SOFTWARE=/dcs04/hicks/data/jsundstr/bulk_processing
 MAINDIR=/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test
 SHORT="ercc-${EXPERIMENT}"
@@ -38,34 +41,34 @@ NUM=$(awk '{print $NF}' ${FILELIST} | uniq | wc -l)
 
 mkdir -p logs
 
-## Define memory
+#Define memory
 if [[ $LARGE == "TRUE" ]]; then
     MEM="10G"                    
 else
     MEM="5G"
 fi
 
-## Paired-end flag 
+#Paired-end flag 
 if [[ -f ".paired_end" ]]; then
     PE="TRUE"
 else
     PE="FALSE"
 fi
 
-## Strandedness flags
+#Strandedness flags
 STRANDOPTION=""
-if [[ $STRANDED == "forward" ]]; then
-    STRANDOPTION="--fr-stranded"
-elif [[ $STRANDED == "reverse" ]]; then
-    STRANDOPTION="--rf-stranded"
-elif [[ $STRANDED != "FALSE" ]]; then
-    echo "Invalid stranded option"
-    exit 1
-fi
+case "${STRANDED}" in  
+    FALSE) ;;
+    forward) STRANDOPTION="--fr-stranded" ;;
+    reverse) STRANDOPTION="--rf-stranded" ;;
+    *) echo "Invalid stranded option: ${STRANDED}"; exit 1 ;;
+esac
 
-## Write ERCC array job
-cat > .${JOBNAME}.slurm <<EOF
+#Create ERCC array job
+cat > .${JOBNAME}.slurm <<EOF  #Begin job script
 #!/bin/bash
+
+#Define SLURM parameters
 #SBATCH --job-name=${JOBNAME}
 #SBATCH --cpus-per-task=${CORES}
 #SBATCH --mem=${MEM}
@@ -78,15 +81,19 @@ date
 echo "Node: \$(hostname)"
 echo "Task ID: \$SLURM_ARRAY_TASK_ID"
 
+#Get file names and IDs from manifest
 ID=\$(awk '{print \$NF}' ${FILELIST} | awk "NR==\$SLURM_ARRAY_TASK_ID")
 FILE1=\$(awk '{print \$1}' ${FILELIST} | awk "NR==\$SLURM_ARRAY_TASK_ID")
 
+#Use second file for paired-end data
 if [[ "${PE}" == "TRUE" ]]; then
     FILE2=\$(awk '{print \$3}' ${FILELIST} | awk "NR==\$SLURM_ARRAY_TASK_ID")
 fi
 
+#Create output directory
 mkdir -p ${MAINDIR}/Ercc/\${ID}
 
+#Run Kallisto based on paried-end or single-end options
 if [[ "${PE}" == "TRUE" ]]; then
     ${SOFTWARE}/kallisto quant \\
         -i /dcs04/hicks/data/jsundstr/bulk_processing/ERCC/ERCC92.idx \\
@@ -102,10 +109,14 @@ else
 fi
 echo "**** Job ends ****"
 date
-EOF
+EOF #End of job script
 
-## Submit ERCC job WITH dependency
-ERCC_JOBID=$(sbatch --dependency=afterok:${MERGE_JOBID} .${JOBNAME}.slurm | awk '{print $4}')
+#Submit ERCC job w/ dependency on merge job
+if squeue -h -o "%A" | grep -q "pipeline_setup" && squeue -h -o "%A" | grep -q "step00-merge-${EXPERIMENT}.${PREFIX}"; then
+    ERCC_JOBID=$(sbatch --dependency=afterok:pipeline_setup:step00-merge-${EXPERIMENT}.${PREFIX} .${JOBNAME}.slurm | awk '{print $4}')
+else
+    ERCC_JOBID=$(sbatch .${JOBNAME}.slurm | awk '{print $4}')
+fi
 
 echo "ERCC job submitted with JobID: ${ERCC_JOBID}"
-echo "Dependency: afterok:${MERGE_JOBID}"
+
