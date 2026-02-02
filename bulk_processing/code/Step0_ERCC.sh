@@ -64,8 +64,8 @@ case "${STRANDED}" in
     *) echo "Invalid stranded option: ${STRANDED}"; exit 1 ;;
 esac
 
-#Create ERCC array job
-cat > .${JOBNAME}.slurm <<EOF  #Begin job script
+#Create ERCC array job and submit to SLURM
+cat > ${MAINDIR}/.${JOBNAME}.sh <<EOF
 #!/bin/bash
 
 #Define SLURM parameters
@@ -109,7 +109,9 @@ else
 fi
 echo "**** Job ends ****"
 date
-EOF #End of job script
+EOF 
+
+ERCC_JOBID=""
 
 #Submit ERCC job w/ dependency on merge job
 if squeue -h -o "%A" | grep -q "pipeline_setup" && squeue -h -o "%A" | grep -q "step00-merge-${EXPERIMENT}.${PREFIX}"; then
