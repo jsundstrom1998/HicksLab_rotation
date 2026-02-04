@@ -31,13 +31,14 @@ done
 
 #Defining more variables
 SOFTWARE=/dcs04/hicks/data/jsundstr/bulk_processing
-MAINDIR=/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test
+MAINDIR=/dcs04/hicks/data/jsundstr/bulk_processing/code
 SHORT="ercc-${EXPERIMENT}"
 JOBNAME="step0-${SHORT}.${PREFIX}" 
 
-FILELIST=${MAINDIR}/samples.manifest
+FILELIST=/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/samples.manifest
 NUM=$(awk '{print $NF}' ${FILELIST} | uniq | wc -l)
 
+ERCC_JOBID=""
 
 mkdir -p logs
 
@@ -109,15 +110,13 @@ else
 fi
 echo "**** Job ends ****"
 date
-EOF 
-
-ERCC_JOBID=""
+EOF
 
 #Submit ERCC job w/ dependency on merge job
 if squeue -h -o "%A" | grep -q "pipeline_setup" && squeue -h -o "%A" | grep -q "step00-merge-${EXPERIMENT}.${PREFIX}"; then
-    ERCC_JOBID=$(sbatch --dependency=afterok:pipeline_setup:step00-merge-${EXPERIMENT}.${PREFIX} .${JOBNAME}.slurm | awk '{print $4}')
+    ERCC_JOBID=$(sbatch --dependency=afterok:pipeline_setup:step00-merge-${EXPERIMENT}.${PREFIX} .${JOBNAME}.sh | awk '{print $4}')
 else
-    ERCC_JOBID=$(sbatch .${JOBNAME}.slurm | awk '{print $4}')
+    ERCC_JOBID=$(sbatch .${JOBNAME}.sh | awk '{print $4}')
 fi
 
 echo "ERCC job submitted with JobID: ${ERCC_JOBID}"
