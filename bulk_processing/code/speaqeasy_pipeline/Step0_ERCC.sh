@@ -95,14 +95,17 @@ fi
 mkdir -p ${MAINDIR}/Ercc/\${ID}
 
 #Run Kallisto based on paried-end or single-end options
+
+module load kallisto
+
 if [[ "${PE}" == "TRUE" ]]; then
-    ${SOFTWARE}/kallisto quant \\
+    kallisto quant \\
         -i /dcs04/hicks/data/jsundstr/bulk_processing/ERCC/ERCC92.idx \\
         -o ${MAINDIR}/Ercc/\${ID} \\
         -t ${CORES} ${STRANDOPTION} \\
         \${FILE1} \${FILE2}
 else
-    ${SOFTWARE}/kallisto quant \\
+    kallisto quant \\
         -i /dcs04/hicks/data/jsundstr/bulk_processing/ERCC/ERCC92.idx \\
         -o ${MAINDIR}/Ercc/\${ID} \\
         -t ${CORES} --single ${STRANDOPTION} \\

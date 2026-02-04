@@ -5,7 +5,7 @@ library('devtools')
 #Store file locations as variables in a list
 optloc <- list(
     samples = '/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/samples.manifest',
-    output = '/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/'
+    output = '/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/merged_fastq'
 )
 
 #optloc <- getopt(loc)
@@ -38,7 +38,7 @@ merged <- length(unique(manifest[, ncol(manifest)])) == nrow(manifest)
 if(!merged) {
     system('touch .requires_merging')
     message(paste0(Sys.time(), ' creating .samples_unmerged.manifest'))
-    system(paste('mv', optloc$sample, file.path(dirname(optloc$sample),
+    system(paste('mv', optloc$samples, file.path(dirname(optloc$samples),
         '.samples_unmerged.manifest')))
 
     message(paste(Sys.time(), 'creating the new samples.manifest file with the merged samples'))
@@ -66,7 +66,7 @@ if(!merged) {
     ## Make names short, in case you want to interactively check the new manifest
     colnames(new_manifest) <- paste0('V', seq_len(ncol(new_manifest)))
 
-    write.table(new_manifest, file = optloc$sample, row.names = FALSE,
+    write.table(new_manifest, file = optloc$samples, row.names = FALSE,
         col.names = FALSE, quote = FALSE, sep = '\t')
 }
 
