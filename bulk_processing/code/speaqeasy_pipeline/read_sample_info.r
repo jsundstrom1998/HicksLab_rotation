@@ -8,8 +8,6 @@ optloc <- list(
     output = '/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/merged_fastq'
 )
 
-#optloc <- getopt(loc)
-
 #Read in manifest 
 manifest <- read.table(optloc$samples, sep = '\t', header = FALSE,
     stringsAsFactors = FALSE)
