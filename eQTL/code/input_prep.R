@@ -18,7 +18,7 @@ pca_path = here(
 )
 
 snp_pcs_path = here(
-    data_directory, "processed-data", "08_bulk_snPC", "v3", 
+    data_directory, "processed-data", "08_bulk_snpPC", "v3", 
     "habenula_R.9_MAF.05.RSann_filt.snpPCs.tab"
 )
 
@@ -88,11 +88,11 @@ write_csv(col_data, file.path(output_dir, 'colData.csv'))
 message(Sys.time(), " - Format covariates")
 
 #Model covariates and save
-pd = as.data.frame(colData(rse)[, expected_covariates])
+pd = as.data.frame(colData(rse)[, covariates])
 covars <- model.matrix(
-        as.formula(paste('~', paste(expected_covariates, collapse = " + "))),
+        as.formula(paste('~', paste(covariates, collapse = " + "))),
         data = pd
-    )[, 2:(1 + length(expected_covariates))] |>
+    )[, 2:(1 + length(covariates))] |>
     t() |>
     as.data.frame() |>
     rownames_to_column("id")
@@ -108,7 +108,7 @@ corner(expression_bed)
 
 message(Sys.time(), " - Write bed table to .bed.gz file")
 data.table::fwrite(
-    expression_bed, here(out_dir, "logcounts.bed.gz"), sep = "\t",
+    expression_bed, here(output_dir, "logcounts.bed.gz"), sep = "\t",
     quote = FALSE, row.names = FALSE
 )
 

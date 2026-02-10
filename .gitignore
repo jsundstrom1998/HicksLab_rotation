@@ -1,1 +1,3 @@
 *.gz
+
+!logcounts.bed.gz
