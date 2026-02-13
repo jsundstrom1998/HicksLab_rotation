@@ -9,15 +9,14 @@ optloc <- list(
     output = '/dcs04/hicks/data/jsundstr/bulk_processing/fastq_test/merged_fastq'
 )
 
-#Disable testing
-testing <- FALSE
-
 #Read in manifest 
 manifest <- read.table(optloc$samples, sep = '\t', header = FALSE,
     stringsAsFactors = FALSE)
 
 #Check if paired end
 paired <- ncol(manifest) > 3
+print(manifest)
+
 
 #Find file extensions
 files <- manifest[, 1]
@@ -49,7 +48,7 @@ merge_files <- function(file_names, new_file) {
     message(paste(Sys.time(), 'creating', new_file))
     call <- paste('cat', paste(file_names, collapse = ' '), '>', new_file)
     print(call)
-    if(!testing) system(call)
+    system(call)
 }
 
 res <- bpmapply(function(common, new_name, extension) {
