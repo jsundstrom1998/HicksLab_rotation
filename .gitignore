@@ -1,3 +1,14 @@
 *.gz
+.paired_end
+.requires_merging
+.steo0-ercc-Test.PairedEnd.sh
+abundance.h5
+abundance.tsv
+run_info.json
+ercc-Test.1.err
+logs/
+FastQC/
+?/
+*.out
 
 !logcounts.bed.gz

@@ -31,7 +31,7 @@ done
 
 #Defining more variables
 SOFTWARE=/dcs04/hicks/data/jsundstr/bulk_processing
-MAINDIR=/dcs04/hicks/data/jsundstr/bulk_processing/code
+MAINDIR=/dcs04/hicks/data/jsundstr/bulk_processing/code/speaqeasy_pipeline
 SHORT="ercc-${EXPERIMENT}"
 JOBNAME="step0-${SHORT}.${PREFIX}" 
 
