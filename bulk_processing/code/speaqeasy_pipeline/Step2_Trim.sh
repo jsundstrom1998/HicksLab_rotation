@@ -1,0 +1,191 @@
+#!/bin/bash
+
+## Usage information:
+# bash step2-trim.sh --help
+
+# Define variables
+TEMP=$(getopt -o x:p:c:l:h --long experiment:,prefix:,cores:,large:,help -n 'step2-trim' -- "$@")
+eval set -- "$TEMP"
+
+LARGE="FALSE"
+CORES=8
+
+while true; do
+    case "$1" in
+        -x|--experiment)
+            case "$2" in
+                "") shift 2 ;;
+                *) EXPERIMENT=$2 ; shift 2;;
+            esac;;
+        -p|--prefix)
+            case "$2" in
+                "") shift 2 ;;
+                *) PREFIX=$2 ; shift 2;;
+            esac;;
+        -c|--cores)
+            case "$2" in
+                "") CORES="8" ; shift 2;;
+                *) CORES=$2; shift 2;;
+            esac ;;
+        -l|--large)
+            case "$2" in
+                "") LARGE="FALSE" ; shift 2;;
+                *) LARGE=$2; shift 2;;
+            esac ;;
+        -h|--help)
+            echo -e "Usage:\nShort options:\n  bash step2-trim.sh -x -p -c (default:8) -l (default:FALSE)\nLong options:\n  bash step2-trim.sh --experiment --prefix --cores (default:8) --large (default:FALSE)"; exit 0; shift ;;
+            --) shift; break ;;
+        *) echo "Incorrect options!"; exit 1;;
+    esac
+done
+
+SOFTWARE=/users/jsundstr/hicks_home/bulk_processing/
+MAINDIR=/users/jsundstr/hicks_home/bulk_processing/
+SHORT="trim-${EXPERIMENT}"
+sname="Step2-${SHORT}.${PREFIX}"
+
+if [[ $LARGE == "TRUE" ]]
+then
+    MEM="mem_free=30G,h_vmem=35G,h_fsize=100G"
+else
+    MEM="mem_free=20G,h_vmem=25G,h_fsize=100G"
+fi
+
+if [ -f ".send_emails" ]
+then
+    EMAIL="e"
+else
+    EMAIL="a"
+fi
+
+if [ -f ".queue" ]
+then
+    SQUEUE="$(cat .queue),"
+else
+    SQUEUE=""
+fi
+
+if [ -f ".paired_end" ]
+then
+    PE="TRUE"
+else
+    PE="FALSE"
+fi
+
+# Construct shell files
+FILELIST=${MAINDIR}/fastq_test/samples.manifest
+NUM=$(cat $FILELIST | awk '{print $NF}' | uniq | wc -l)
+echo "Creating script ${sname}"
+
+echo "Number of samples: $NUM"
+
+cat > ${MAINDIR}/code/speaqeasy_pipeline/.${sname}.sh <<EOF
+#!/bin/bash
+#SBATCH --job-name=${sname}
+#SBATCH --chdir=.
+#SBATCH --output=./logs/${SHORT}.%a.txt
+#SBATCH --error=./logs/${SHORT}.%a.txt
+#SBATCH --array=1-${NUM}%5
+#SBATCH --cpus-per-task=${CORES}
+#SBATCH --mem=7G                  
+##SBATCH --dependency=afterok:pipeline_setup,step1-fastqc-${EXPERIMENT}.${PREFIX}
+#SBATCH --mail-type=ALL          
+
+echo "**** Job starts ****"
+date
+
+echo "**** JHPCE info ****"
+echo "User: \${USER}"
+echo "Job id: \${SLURM_JOB_ID}"
+echo "Job name: \${SLURM_JOB_NAME}"
+echo "Hostname: \${HOSTNAME}"
+echo "Task id: \${SLURM_ARRAY_TASK_ID}"
+echo "****"
+echo "Sample id: \$(cat ${MAINDIR}/fastq_test/samples.manifest | awk '{print \$NF}' | awk "NR==\${SLURM_ARRAY_TASK_ID}")"
+echo "****"
+
+## Locate file and idsf
+FILE1=\$(awk 'BEGIN {FS="\t"} {print \$1}' ${FILELIST} | awk "NR==\${SLURM_ARRAY_TASK_ID}")
+FILEBASE1=\$(basename \${FILE1} | sed 's/.fq.gz//; s/.fq//; s/.fastq.gz//; s/.fastq//')
+if [ $PE == "TRUE" ] 
+then
+    FILE2=\$(awk 'BEGIN {FS="\t"} {print \$3}' ${FILELIST} | awk "NR==\${SLURM_ARRAY_TASK_ID}")
+    FILEBASE2=\$(basename \${FILE2} | sed 's/.fq.gz//; s/.fq//; s/.fastq.gz//; s/.fastq//')
+fi
+ID=\$(cat ${FILELIST} | awk '{print \$NF}' | awk "NR==\${SLURM_ARRAY_TASK_ID}")
+
+if [ $PE == "TRUE" ] ; then 
+	REPORT1=${MAINDIR}/FastQC/Untrimmed/\${ID}/\${FILEBASE1}_fastqc/summary.txt
+	REPORT2=${MAINDIR}/FastQC/Untrimmed/\${ID}/\${FILEBASE2}_fastqc/summary.txt
+	RESULT1=\$(grep "Adapter Content" \$REPORT1 | cut -c1-4)
+	RESULT2=\$(grep "Adapter Content" \$REPORT2 | cut -c1-4)
+
+	if [[ \$RESULT1 == "FAIL" || \$RESULT2 == "FAIL" ]] ; then
+		## trim, rerun fastQC
+		echo "End 1 adapters: \$RESULT1"
+		echo "End 2 adapters: \$RESULT2"
+		echo "Trimming will occur."
+		
+		mkdir -p ${MAINDIR}/FastQC/trimmed_fq
+		FP=${MAINDIR}/FastQC/trimmed_fq/\${ID}_trimmed_forward_paired.fastq
+		FU=${MAINDIR}/FastQC/trimmed_fq/\${ID}_trimmed_forward_unpaired.fastq
+		RP=${MAINDIR}/FastQC/trimmed_fq/\${ID}_trimmed_reverse_paired.fastq
+		RU=${MAINDIR}/FastQC/trimmed_fq/\${ID}_trimmed_reverse_unpaired.fastq
+		
+		## trim adapters
+        module load trimmomatic/0.39
+        trimmomatic PE -threads ${CORES} -phred33 \
+            \${FILE1} \${FILE2} \$FP \$FU \$RP \$RU \
+            ILLUMINACLIP:TruSeq2-PE.fa:2:30:10:1 \
+            LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:75
+
+		## rerun fastqc
+
+        module load fastqc/0.11.8
+
+		mkdir -p ${MAINDIR}/FastQC/Trimmed/\${ID}
+		fastqc \
+
+		\$FP \$FU \$RP \$RU \
+		--outdir=${MAINDIR}/FastQC/Trimmed/\${ID} --extract
+	else
+		echo "No trimming required!"
+	fi
+
+else
+	## reads are single-end
+	REPORT1=${MAINDIR}/FastQC/Untrimmed/\${ID}/\${FILEBASE1}_fastqc/summary.txt
+	RESULT1=\$(grep "Adapter Content" \$REPORT1 | cut -c1-4)
+
+	if [[ \$RESULT1 == "FAIL" ]] ; then
+		## trim, rerun fastQC
+		echo "Adapters: \$RESULT1"
+		echo "Trimming will occur."
+		
+		mkdir -p ${MAINDIR}/FastQC/trimmed_fq
+		OUT=${MAINDIR}/FastQC/trimmed_fq/\${ID}_trimmed.fastq
+		
+		## trim adapters
+        module load trimmomatic/0.39
+        trimmomatic SE -threads ${CORES} -phred33 \
+            \${FILE1} \$OUT \
+            ILLUMINACLIP:TruSeq2-SE.fa:2:30:10:1 \
+            LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+		## rerun fastqc
+		mkdir -p ${MAINDIR}/FastQC/Trimmed/\${ID}
+		fastqc \
+		--outdir=${MAINDIR}/FastQC/Trimmed/\${ID} --extract
+	else
+		echo "No trimming required!"
+	fi
+fi
+
+	
+echo "**** Job ends ****"
+date
+EOF
+
+call="sbatch ${MAINDIR}/code/speaqeasy_pipeline/.${sname}.sh"
+echo $call
+$call
