@@ -3,7 +3,7 @@
 ## Usage information:
 # bash step2-trim.sh --help
 
-# Define variables
+# Arguments
 TEMP=$(getopt -o x:p:c:l:h --long experiment:,prefix:,cores:,large:,help -n 'step2-trim' -- "$@")
 eval set -- "$TEMP"
 
@@ -39,7 +39,7 @@ while true; do
     esac
 done
 
-SOFTWARE=/users/jsundstr/hicks_home/bulk_processing/
+#SOFTWARE=/users/jsundstr/hicks_home/bulk_processing/
 MAINDIR=/users/jsundstr/hicks_home/bulk_processing/
 SHORT="trim-${EXPERIMENT}"
 sname="Step2-${SHORT}.${PREFIX}"
@@ -87,19 +87,21 @@ cat > ${MAINDIR}/code/speaqeasy_pipeline/.${sname}.sh <<EOF
 #SBATCH --error=./logs/${SHORT}.%a.txt
 #SBATCH --array=1-${NUM}%5
 #SBATCH --cpus-per-task=${CORES}
-#SBATCH --mem=7G                  
+#SBATCH --mem=7G     
+
 ##SBATCH --dependency=afterok:pipeline_setup,step1-fastqc-${EXPERIMENT}.${PREFIX}
+
 #SBATCH --mail-type=ALL          
 
 echo "**** Job starts ****"
 date
 
 echo "**** JHPCE info ****"
-echo "User: \${USER}"
-echo "Job id: \${SLURM_JOB_ID}"
-echo "Job name: \${SLURM_JOB_NAME}"
-echo "Hostname: \${HOSTNAME}"
-echo "Task id: \${SLURM_ARRAY_TASK_ID}"
+echo "User: ${USER}"
+echo "Job id: ${SLURM_JOB_ID}"
+echo "Job name: ${SLURM_JOB_NAME}"
+echo "Hostname: ${HOSTNAME}"
+echo "Task id: ${SLURM_ARRAY_TASK_ID}"
 echo "****"
 echo "Sample id: \$(cat ${MAINDIR}/fastq_test/samples.manifest | awk '{print \$NF}' | awk "NR==\${SLURM_ARRAY_TASK_ID}")"
 echo "****"

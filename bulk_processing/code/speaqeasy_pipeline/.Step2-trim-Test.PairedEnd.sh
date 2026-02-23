@@ -5,8 +5,10 @@
 #SBATCH --error=./logs/trim-Test.%a.txt
 #SBATCH --array=1-1%5
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=7G                  
+#SBATCH --mem=7G     
+
 ##SBATCH --dependency=afterok:pipeline_setup,step1-fastqc-Test.PairedEnd
+
 #SBATCH --mail-type=ALL          
 
 echo "**** Job starts ****"
