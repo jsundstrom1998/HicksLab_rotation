@@ -10,5 +10,10 @@ logs/
 FastQC/
 ?/
 *.out
+*.ht2
+*.sam
+
+
+
 
 !logcounts.bed.gz
