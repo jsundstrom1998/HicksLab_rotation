@@ -151,18 +151,18 @@ echo "**** Job starts ****"
 date
 
 echo "**** JHPCE info ****"
-echo "User: ${USER}"
-echo "Job id: ${SLURM_JOB_ID}"
-echo "Job name: ${SLURM_JOB_NAME}"
-echo "Hostname: ${HOSTNAME}"
-echo "Task id: ${SLURM_ARRAY_TASK_ID}"
+echo "User: \${USER}"
+echo "Job id: \${SLURM_JOB_ID}"
+echo "Job name: \${SLURM_JOB_NAME}"
+echo "Hostname: \${HOSTNAME}"
+echo "Task id: \${SLURM_ARRAY_TASK_ID}"
 echo "****"
-echo "Sample id: $(cat ${MAINDIR}/fastq_test/samples.manifest | awk '{print \$NF}' | awk "NR==\${SLURM_ARRAY_TASK_ID}")"
+echo "Sample id: \$(cat ${MAINDIR}/fastq_test/samples.manifest | awk '{print \$NF}' | awk "NR==\${SLURM_ARRAY_TASK_ID}")"
 echo "****"
 
 # Directories
 mkdir -p ${MAINDIR}/HISAT2_out/align_summaries
-mkdir -p ${MAINDIR}/HISAT2_out/infer_strandness
+#mkdir -p ${MAINDIR}/HISAT2_out/infer_strandness
 
 if [ ${UNALIGNED} == "TRUE" ]
 then
