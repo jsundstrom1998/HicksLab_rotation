@@ -1,3 +1,4 @@
+#Hiding mostly output files
 *.gz
 .paired_end
 .requires_merging
@@ -8,12 +9,11 @@ run_info.json
 ercc-Test.1.err
 logs/
 FastQC/
-?/
 *.out
 *.ht2
 *.sam
-
-
-
+*.parquet
+cis_out.csv
+independent_out.csv
 
 !logcounts.bed.gz
