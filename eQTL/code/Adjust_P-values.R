@@ -7,7 +7,6 @@ library("qs2")
 library("getopt")
 
 data_directory = "/users/jsundstr/hicks_home/eQTL/"
-parquet_directory = "/dcs04/lieber/lcolladotor/pilotHb_LIBD001/Roche_Habenula/processed-data/17_eQTL/tensorQTL_output/"
 #pd_nominal = "/dcs04/lieber/lcolladotor/pilotHb_LIBD001/Roche_Habenula/processed-data/17_eQTL/tensorQTL_output/nominal"
 #pd_inter_thal = "/dcs04/lieber/lcolladotor/pilotHb_LIBD001/Roche_Habenula/processed-data/17_eQTL/tensorQTL_output/interaction_tot_Thal"
 #pd_inter_Hb = "/dcs04/lieber/lcolladotor/pilotHb_LIBD001/Roche_Habenula/processed-data/17_eQTL/tensorQTL_output/interaction_tot_Hb"
@@ -49,7 +48,7 @@ p_val_cutoff = 0.05
 #Retrieve the relevant parquet files based on the mode and read them in, adjusting the p-values accordingly
 if (opt$mode == 'nominal') {
     parquet_files <- list.files(
-        parquet_directory,
+        out_dir,
         pattern = "\\.parquet$",
         full.names = TRUE
     )
@@ -58,7 +57,7 @@ if (opt$mode == 'nominal') {
         mutate(FDR = p.adjust(pval_nominal, "fdr"))
 } else if (opt$mode == "interaction") {
     parquet_files <- list.files(
-        parquet_directory,
+        out_dir,
         pattern = "\\.parquet$",
         full.names = TRUE
     )
@@ -94,7 +93,7 @@ fn <- here(
 
 #Save as CSV and the faster qs
 write_csv(eqtl_out_filtered, file = paste0(fn, ".csv"))
-qs2::qsave(eqtl_out_filtered, file = paste0(fn, ".qs"))
+qs2::qs_save(eqtl_out_filtered, file = paste0(fn, ".qs"))
 
 #Reproducibility information
 print("Reproducibility information:")

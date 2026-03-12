@@ -15,5 +15,7 @@ FastQC/
 *.parquet
 cis_out.csv
 independent_out.csv
+FDR05.csv
+FDR05.qs
 
 !logcounts.bed.gz

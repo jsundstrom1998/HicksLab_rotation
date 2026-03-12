@@ -7,13 +7,13 @@
 #SBATCH -o /dev/null
 #SBATCH -e /dev/null
 
-run_mode=independent
+run_mode=nominal
 interaction_cov=none
 
 if [[ "$run_mode" == "interaction" ]]; then
-    log_path="logs/Adjust_P-value_${run_mode}_${interaction_cov}.log"
+    log_path="logs/Adjust_P-values_${run_mode}_${interaction_cov}.log"
 else
-    log_path="logs/Adjust_P-value_${run_mode}.log"
+    log_path="logs/Adjust_P-values_${run_mode}.log"
 fi
 
 {
@@ -28,7 +28,7 @@ echo "Job name: ${SLURM_JOB_NAME}"
 echo "Node name: ${SLURMD_NODENAME}"
 
 module load conda_R/4.3
-Rscript Adjust_P-value.R -m $run_mode -c $interaction_cov
+Rscript Adjust_P-values.R -m $run_mode -c $interaction_cov
 
 echo "**** Job ends ****"
 date
