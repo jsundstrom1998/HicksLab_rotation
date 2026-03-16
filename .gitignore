@@ -17,5 +17,8 @@ cis_out.csv
 independent_out.csv
 FDR05.csv
 FDR05.qs
+*.pdf
+rsID_independent_deg_or_gwas_wide.csv
 
 !logcounts.bed.gz
+
