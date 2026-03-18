@@ -7,8 +7,8 @@
 #SBATCH -o /dev/null
 #SBATCH -e /dev/null
 
-run_mode=independent
-interaction_cov=none
+run_mode=interaction
+interaction_cov=tot_Thal
 
 if [[ "$run_mode" == "interaction" ]]; then
     log_path="logs/run_tensorqtl_${run_mode}_${interaction_cov}.log"

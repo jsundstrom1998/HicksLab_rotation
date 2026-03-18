@@ -22,3 +22,7 @@ rsID_independent_deg_or_gwas_wide.csv
 
 !logcounts.bed.gz
 
+eQTL/tensorQTL_output/interaction_tot_Thal/all.csv
+eQTL/tensorQTL_output/interaction_tot_Hb/all.csv
+eQTL/tensorQTL_output/combined_interaction_subset.csv
+eQTL/paired_DEA_eQTL_SNPs.vcf
