@@ -18,7 +18,7 @@ echo "Job name: ${SLURM_JOB_NAME}"
 echo "Node name: ${SLURMD_NODENAME}"
 
 module load conda_R/4.3.x
-Rscript Clean_and_Subset.R
+Rscript Clean_and_Subset_hb_only.R
 
 echo "**** Job ends ****"
 date

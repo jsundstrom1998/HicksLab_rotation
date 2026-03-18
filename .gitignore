@@ -26,3 +26,4 @@ eQTL/tensorQTL_output/interaction_tot_Thal/all.csv
 eQTL/tensorQTL_output/interaction_tot_Hb/all.csv
 eQTL/tensorQTL_output/combined_interaction_subset.csv
 eQTL/paired_DEA_eQTL_SNPs.vcf
+eQTL/independent_eqtl_supp_tab.csv

@@ -9,32 +9,35 @@ library(ggrepel)
 library(bigsnpr)
 library(MRutils)
 
+lieber = "/dcs04/lieber/lcolladotor/pilotHb_LIBD001/Roche_Habenula/"
+eqtl_dir = "/users/jsundstr/hicks_home/eQTL/"
+
 eqtl_independent_path = here(
-    'processed-data', '17_eQTL', 'tensorQTL_output', 'independent', 'FDR05.csv'
+    eqtl_dir, 'tensorQTL_output', 'independent', 'FDR05.csv'
 )
 eqtl_int_path = here(
-    'processed-data', '17_eQTL', 'tensorQTL_output', 'combined_interaction_subset.csv'
+    eqtl_dir, 'tensorQTL_output', 'combined_interaction_subset.csv'
 )
-deg_path = here(
+deg_path = here(lieber,
     'processed-data', '10_DEA', '04_DEA',
     'DEA_All-gene_qc-totAGene-qSVs-Hb-Thal.tsv'
 )
-gwas_wide_filt_path = here(
+gwas_wide_filt_path = here(lieber,
     'processed-data', '17_eQTL', 'gwas_wide_filtered.csv'
 )
-gwas_wide_path = here(
+gwas_wide_path = here(lieber,
     "processed-data", "13_MAGMA","GWAS", "scz2022",
     "PGC3_SCZ_wave3.european.autosome.public.v3.vcf.tsv.gz"
 )
-rse_path = here(
+rse_path = here(lieber,
     'processed-data', 'rse_objects', 'rse_gene_Habenula_Pilot.rda'
 )
-bsp2_path = here('processed-data', '17_eQTL', 'BSP2_cleaned_eqtl.csv')
+bsp2_path = here(lieber, 'processed-data', '17_eQTL', 'BSP2_cleaned_eqtl.csv')
 supp_tab_path = here(
-    'processed-data', '17_eQTL', 'independent_eqtl_supp_tab.csv'
+    eqtl_dir, 'independent_eqtl_supp_tab.csv'
 )
 
-plot_dir = here('plots', '17_eQTL')
+plot_dir = here(eqtl_dir, 'plots')
 
 sig_cutoff_deg = 0.1
 
